@@ -10,7 +10,7 @@ We wanted to analyze the best EV for an average customer after analyzing the dif
 This project was done in 24 hours, we analyzed the key attributes the best we could within the time period. That being said there may be several relationships missing and will be updated as we work on it further. 
 
 ### Code
-We mainly used R and SPSS to develop the graphs we used for our analysis. 
+We mainly used R and Microsoft Excel to develop the graphs we used for our analysis. 
 
 ### Installation
 If you would like to follow along and run the code yourself, you will need RStudio to run R or open the CSV file provided and create the graphs through Excel.  

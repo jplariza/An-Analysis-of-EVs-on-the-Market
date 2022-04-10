@@ -1,0 +1,98 @@
+---
+title: "EVAnalysis"
+output: html_document
+date: '2022-04-09'
+---
+
+```{r setup}
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(plotly)
+library(RColorBrewer)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Read the data, run a summary on the data and create two new columns Range_Miles and PriceDollars
+
+```{r read ev_cars}
+ev_cars <- read_csv("ElectricCarData_Clean.csv")
+summary(ev_cars)
+
+ev_cars <- ev_cars%>%
+  mutate(Range_Miles = round(Range_Km * 0.621371,0)) %>%
+  mutate(PriceDollars = round(PriceEuro * 1.09))
+
+```
+Get the Top 10 EVs by range in miles and create a Bar graph showing the Brand, Model and Range in Miles
+
+```{r top 10 cars by range}
+ev_cars_top10 <- ev_cars[order(-ev_cars$Range_Miles),]
+
+ev_cars_top10 <- ev_cars_top10[1:10,]
+
+ev_cars_top10 %>%
+  ggplot(aes(fill =Model, y = Range_Miles, x = Brand)) + 
+  geom_bar(position="dodge", stat="identity") +
+  xlab("Electric Vehicles") +
+  ylab("Range in Miles") +
+  ggtitle("Range in Miles for Top 10 EV Models") +
+  theme(plot.title = element_text(hjust = 0.5),axis.text.x = element_text(angle = 45)) +
+  scale_fill_brewer(type = "qual", palette = 3)
+
+  
+```
+
+Calculate the mean efficiency of each Brand and generate a Bar Plot showing Top 20 Brands by Mean Efficiency
+```{r Brand by Mean Efficiency}
+ev_cars_mean_effi_brand <- ev_cars %>%
+  group_by(Brand) %>%
+  summarise(mean_efficiency = round(mean(Efficiency_WhKm),0))
+
+ev_cars_mean_effi_brand <- ev_cars_mean_effi_brand[order(-ev_cars_mean_effi_brand$mean_efficiency),]
+ev_cars_mean_effi_brand %>%
+  mutate(Brand = fct_rev(fct_reorder(Brand, mean_efficiency))) %>%
+  head(n = 20) %>%
+  ggplot(aes(Brand, mean_efficiency,fill = Brand)) +
+  geom_bar(position="dodge", stat="identity") +
+  xlab("Brand") +
+  ylab("Mean Efficiency") +
+  ggtitle("Top 20 Brands by Mean Efficiency") +
+  theme(plot.title = element_text(hjust = 0.5),axis.text.x = element_text(angle = 45), legend.position="none") 
+  
+
+```
+
+
+
+Generate a Boxplots showing the Price by Body Style
+```{r Boxplot}
+ev_cars %>%
+  ggplot(aes(BodyStyle, PriceDollars, fill = BodyStyle)) +
+  geom_boxplot() +
+  xlab("Body Style") +
+  ylab("Price in Dollars") +
+  ggtitle("Price by Body Style") +
+  theme(plot.title = element_text(hjust = 0.5), legend.position="none") 
+ 
+ggplotly()
+
+```
+
+As Tesla is one of the most well known EV brands in the market, below is a bubble graph showing all Tesla models by Price, Range and Body Style.
+```{r Tesla}
+ev_cars %>%
+  filter(Brand == "Tesla") %>%
+  ggplot(aes(x = Model, y = PriceDollars, size = Range_Miles, color = BodyStyle)) +
+  geom_point(alpha = 0.5) +
+  scale_size(range = c(1, 15)) +
+  xlab("Tesla Models") +
+  ylab("Price in Dollars") +
+  ggtitle("A Closer Look at the Different Tesla Models") + 
+  theme(plot.title = element_text(hjust = 0.5),axis.text.x = element_text(angle = 90))
+
+ggplotly()
+  
+```
+
+
